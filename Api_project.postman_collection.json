@@ -1,0 +1,221 @@
+{
+	"info": {
+		"_postman_id": "eac13d3a-f645-4a94-9c06-7d321d912a4f",
+		"name": "Api_project",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "7321987"
+	},
+	"item": [
+		{
+			"name": "Create Booking",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json()\r",
+							"pm.environment.set(\"id\", jsonData.bookingid)"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var firstname = pm.variables.replaceIn(\"{{$randomFirstName}}\")\r",
+							"pm.environment.set(\"firstname\", firstname)\r",
+							"//console.log(firstname)\r",
+							"\r",
+							"var lastname = pm.variables.replaceIn(\"{{$randomLastName}}\")\r",
+							"pm.environment.set(\"lastname\",lastname)\r",
+							"\r",
+							"var totalprice = pm.variables.replaceIn(\"{{$randomInt}}\")\r",
+							"pm.environment.set(\"totalprice\",totalprice)\r",
+							"\r",
+							"var depositpaid = pm.variables.replaceIn(\"{{$randomBoolean}}\")\r",
+							"pm.environment.set(\"depositpaid\",depositpaid)\r",
+							"\r",
+							"//Date\r",
+							"const moment =  require('moment')\r",
+							"const today = moment()\r",
+							"pm.environment.set(\"checkin\", today.add(1,\"d\").format(\"YYYY-MM-DD\"))\r",
+							"pm.environment.set(\"checkout\", today.add(5,\"d\").format(\"YYYY-MM-DD\"))\r",
+							"//console.log(today.format(\"YYYY-MM-DD\"))\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"firstname\" : \"{{firstname}}\",\r\n\t\"lastname\" : \"{{lastname}}\",\r\n\t\"totalprice\" : {{totalprice}},\r\n\t\"depositpaid\" : {{depositpaid}},\r\n\t\"bookingdates\" : {\r\n    \t\"checkin\" : \"{{checkin}}\",\r\n    \t\"checkout\" : \"{{checkout}}\"\r\n\t},\r\n\t\"additionalneeds\" : \"Breakfast\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/booking/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"booking",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Booking",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json()\r",
+							"\r",
+							"pm.test(\"first name varify\", function(){\r",
+							"    pm.expect(jsonData.firstname).to.eql(pm.environment.get(\"firstname\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"last name varify\", function(){\r",
+							"    pm.expect(jsonData.lastname).to.eql(pm.environment.get(\"lastname\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Total price \", function(){\r",
+							"    // Get the 'totalprice' from the response data\r",
+							"    const responseTotalPrice = jsonData.totalprice;\r",
+							"        // Get the 'totalprice' from the environment variable\r",
+							"    const environmentTotalPrice = pm.environment.get(\"totalprice\");\r",
+							"    // Convert 'environmentTotalPrice' to a number using parseInt() or parseFloat()\r",
+							"    const environmentTotalPriceAsNumber = parseInt(environmentTotalPrice);\r",
+							"     // Compare the values\r",
+							"    pm.expect(responseTotalPrice).to.eql(environmentTotalPriceAsNumber);\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Respons for depositpaid\", function () {\r",
+							"     // Get the expected boolean value from the environment variable\r",
+							"    const expectedDepositPaid = pm.environment.get(\"depositpaid\").toLowerCase() === \"true\";\r",
+							"\r",
+							"    // Get the actual boolean value from the response data\r",
+							"    const actualDepositPaid = jsonData.depositpaid;\r",
+							"\r",
+							"    // Compare the values\r",
+							"    pm.expect(actualDepositPaid).to.eql(expectedDepositPaid);\r",
+							"})\r",
+							"\r",
+							"pm.test(\"checkin validation \", function(){\r",
+							"    pm.expect(jsonData.bookingdates.checkin).to.eql(pm.environment.get(\"checkin\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"checkout validation \", function(){\r",
+							"    pm.expect(jsonData.bookingdates.checkout).to.eql(pm.environment.get(\"checkout\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"additionalneeds validation \", function(){\r",
+							"    pm.expect(jsonData.additionalneeds).to.eql(\"Breakfast\")\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/booking/{{id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"booking",
+						"{{id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var tokenData = pm.response.json()\r",
+							"pm.environment.set(\"token\",tokenData.token)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"username\": \"admin\",\r\n\t\"password\": \"password123\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/auth",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"auth"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Booking",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "token={{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"firstname\" : \"NewUpdate\",\r\n\t\"lastname\" : \"Brown\",\r\n\t\"totalprice\" : 111,\r\n\t\"depositpaid\" : true,\r\n\t\"bookingdates\" : {\r\n    \t\"checkin\" : \"2018-01-01\",\r\n    \t\"checkout\" : \"2019-01-01\"\r\n\t},\r\n\t\"additionalneeds\" : \"Breakfast\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/booking/{{id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"booking",
+						"{{id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
